@@ -15,12 +15,12 @@ class Block {
         int Nonce = 0;
         int Difficulty = 0;
         bool Mined = false;
-        std::list<Transaction> Transactions;
+        std::vector<Transaction> Transactions;
 
     public:
         Block() {};
 
-        Block(std::string PreviousHash, std::time_t TimeStamp, std::string Version, int Difficulty, std::list<Transaction> Transactions){
+        Block(std::string PreviousHash, std::time_t TimeStamp, std::string Version, int Difficulty, std::vector<Transaction> Transactions){
             this->PreviousHash = PreviousHash;
             this->Timestamp = TimeStamp;
             this->Version = Version;

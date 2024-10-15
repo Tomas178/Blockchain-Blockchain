@@ -7,8 +7,8 @@
 
 class Data {
     public:
-        std::list<User> Users;
-        std::list<Transaction> Transactions;
+        std::vector<User> Users;
+        std::vector<Transaction> Transactions;
 };
 
 #endif
