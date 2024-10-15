@@ -7,11 +7,17 @@
 #include <stdexcept>
 #include <bitset>
 #include <sstream>
-#include <list>
+#include <vector>
+#include <random>
+#include <fstream>
 
 void PaddedInput(std::string& simboliu_seka);
 void salt(std::string& simboliu_seka);
 std::string Maisos_funkcija(const std::string simboliu_seka);
+void GenerateUsers(int kiekis);
+void GenerateTransactions(int kiekis);
+std::string RandomStringGeneravimas(int ilgis);
+double RandomBalansoGeneravimas();
 
 extern std::string simboliu_seka;
 
