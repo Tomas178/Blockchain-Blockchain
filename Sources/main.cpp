@@ -7,11 +7,11 @@
 int main(){
 
     int UsersCount = 1000;
-    int TransactionsCount = 10000;
-    int BlockSize = 100;
+    int TransactionsCount = 100;
+    int BlockSize = 50;
     std::string GenesisPreviousHash = "Tomas";
     Block* Blockchain_Head;
-    int Difficulty = 3;
+    int Difficulty = 5;
     int WinnerID = 0;
     std::string Version = "1.0";
     int BlockCount = 0;
@@ -29,13 +29,10 @@ int main(){
     GenerateTransactions(TransactionsCount, transactions);
     std::cout << "Transakciju duomenys galima rasti Transakcijos.txt" << std::endl << std::endl;
 
-    /*std::cout << "Vyksta 3 uzduotis... Generuojama 100 random transakciju i bloka" << std::endl;
-    uzduotis3(BlockSize, block, transactions);
-    std::cout << "Bloko duomenys galima rasti Blokas.txt" << std::endl << std::endl;
-    */
-
+    std::cout << "Kasamas Genesis Blokas..." << std::endl;
     Kandidatu_sarasas = GenerateCandidates(transactions, BlockSize);
     Blockchain_Head = new Block(MineBlock(WinnerID, GenesisPreviousHash, nullptr, Version, Difficulty, Kandidatu_sarasas));
+    BlockCount++;
 
     return 0;
 }
