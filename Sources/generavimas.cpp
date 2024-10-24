@@ -100,17 +100,75 @@ std::vector<std::vector<Transaction>> GenerateCandidates(std::vector<Transaction
     return Kandidatu_sarasas;
 }
 
-/*void uzduotis3(int kiekis, std::vector<Block>& blokai, std::vector<Transaction>& transactions){
-    for(int i = 0; i < kiekis; i++){
-        blokai[].
+Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas){
+    int Max_Bandymai = 1000000;
+    int Nonce = 0;
+
+    while(true){
+        bool mined = false;
+
+        for(int i = 0; i <= Kandidatu_sarasas.size(); i++){
+            std::string MasterString = "";
+            std::string MasterHash = "";
+
+            //std::string Merker_Root_Hash = 
+        }   
+
     }
-    
-}*/
 
-/*Block GenerateGenesisBlock(){
-    std::vector<Transaction> transactions;
-    std::vector<Block> blokai;
-    transactions.push_back(Transaction("Genesis", "Genesis", RandomSkaicius()));
-    Block genesis("0", std::time(0), "1.0", 0, transactions);
+}
 
+/*std::string create_merkle(std::vector<Transaction> transactions)
+{
+
+    bc::hash_list merkle = {};
+
+    for(int i = 0; i<transactions.size(); i++) {
+
+        char char_array[65];
+        strcpy(char_array, transactions[i].GetTransactionID.c_str());
+        
+        bc::hash_digest temp_hash = bc::hash_literal(char_array);
+        merkle.push_back(temp_hash);
+    }
+
+    // Stop if hash list is empty or contains one element
+    if (merkle.empty()) return bc::base16(bc::null_hash);
+    else if (merkle.size() == 1) return bc::encode_base16(merkle[0]);
+
+
+    // While there is more than 1 hash in the list, keep looping...
+    while (merkle.size() > 1) {
+
+        // If number of hashes is odd, duplicate last hash in the list.
+        if (merkle.size() % 2 != 0) merkle.push_back(merkle.back());
+
+        // List size is now even.
+        assert(merkle.size() % 2 == 0);
+
+        // New hash list.
+        bc::hash_list new_merkle;
+
+        // Loop through hashes 2 at a time.
+        for (auto it = merkle.begin(); it != merkle.end(); it += 2)
+        {
+            // Join both current hashes together (concatenate).
+            bc::data_chunk concat_data(bc::hash_size * 2);
+            auto concat = bc::serializer<decltype(concat_data.begin())>(concat_data.begin());
+
+            concat.write_hash(*it);
+            concat.write_hash(*(it + 1));
+
+            // Hash both of the hashes.
+            bc::hash_digest new_root = bc::bitcoin_hash(concat_data);
+
+            // Add this to the new list.
+            new_merkle.push_back(new_root);
+        }
+
+        // This is the new list.
+        merkle = new_merkle;
+    }
+    // Finally we end up with a single item.
+    return bc::encode_base16(merkle[0]);
 }*/
