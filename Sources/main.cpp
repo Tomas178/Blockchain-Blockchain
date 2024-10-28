@@ -7,11 +7,11 @@
 int main(){
 
     int UsersCount = 1000;
-    int TransactionsCount = 100;
-    int BlockSize = 50;
+    int TransactionsCount = 10000;
+    int BlockSize = 100;
     std::string GenesisPreviousHash = "Tomas";
     Block* Blockchain_Head;
-    int Difficulty = 5;
+    int Difficulty = 9;
     int WinnerID = 0;
     std::string Version = "1.0";
     int BlockCount = 0;
@@ -29,9 +29,13 @@ int main(){
     GenerateTransactions(TransactionsCount, transactions);
     std::cout << "Transakciju duomenys galima rasti Transakcijos.txt" << std::endl << std::endl;
 
-    std::cout << "Kasamas Genesis Blokas..." << std::endl;
+    std::cout << "Generuojami kandidatai..." << std::endl;
     Kandidatu_sarasas = GenerateCandidates(transactions, BlockSize);
+    std::cout << "Kandidatai sugeneruoti sekmingai." << std::endl << std::endl;
+
+    std::cout << "Kasamas Genesis Blokas..." << std::endl;
     Blockchain_Head = new Block(MineBlock(WinnerID, GenesisPreviousHash, nullptr, Version, Difficulty, Kandidatu_sarasas));
+    std::cout << "Genesis blokas iskastas sekmingai:)" << std::endl;
     BlockCount++;
 
     return 0;

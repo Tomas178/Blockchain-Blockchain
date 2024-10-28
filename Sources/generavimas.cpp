@@ -85,12 +85,11 @@ std::vector<std::vector<Transaction>> GenerateCandidates(std::vector<Transaction
     int kandidatu_kiekis = 5;
     int transakciju_kiekis = (transactions.size() <= BlockSize) ? transactions.size() : BlockSize;
 
-    std::vector<std::vector<Transaction>> Kandidatu_sarasas;
-    std::vector<Transaction> Kandidatu_saraso_kopija = transactions;
+    std::vector<std::vector<Transaction>> Kandidatu_sarasas = {};
 
     for(int i = 0; i < kandidatu_kiekis; i++){
-        std::vector<Transaction> Kandidatai;
-        Kandidatai.reserve(transakciju_kiekis);
+        std::vector<Transaction> Kandidatu_saraso_kopija = transactions;
+        std::vector<Transaction> Kandidatai = {};
 
         for(int j = 0; j < transakciju_kiekis; j++){
             int kandidato_indeksas = RandomSkaicius(0, Kandidatu_saraso_kopija.size()-1);
@@ -103,18 +102,18 @@ std::vector<std::vector<Transaction>> GenerateCandidates(std::vector<Transaction
 }
 
 Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas){
-    int Max_Bandymai = 10000;
+    int Max_Bandymai = 100000;
 
     while(true){
         bool mined = false;
 
-        for(int i = 0; i <= Kandidatu_sarasas.size(); i++){
+        for(int i = 0; i < Kandidatu_sarasas.size(); i++){
             int Nonce = 0;
             std::string MasterString = "";
             std::string MasterHash = "";
 
             std::string Merkel_Root_Hash = create_merkle(Kandidatu_sarasas[i]);
-            std::cout << Merkel_Root_Hash << std::endl;
+            std::cout << "Merkel Root Hash: "<< Merkel_Root_Hash << std::endl;
 
 
             for(int j = 0; j < Max_Bandymai; j++){
@@ -125,14 +124,20 @@ Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPoi
                 //std::cout << "MasterString = "<< MasterString << std::endl;
                 //std::cout << "MasterHash = "<< MasterHash << std::endl;
 
-                for(int i = 0; i < Difficulty; i++){
-                    if(MasterHash[i] != '0') break;
-                    if(i == Difficulty - 1) mined = true;
+                for(int z = 0; z < Difficulty; z++){
+                    if(MasterHash[z] != '0') break;
+                    if(z == Difficulty - 1) mined = true;
                 }
 
                 if(mined){
                     WinnerID = i+1;
                     std::time_t TimeStamp = std::time(nullptr);
+
+                    std::cout << "MasterString: " << MasterString << std::endl;
+                    std::cout << "MasterHash: " << MasterHash << std::endl;
+                    std::cout << "Nonce: " << Nonce << std::endl;
+                    std::cout << "WinnerID: " << WinnerID << std::endl;
+
 
                     // Output the time in seconds since the epoch
                     std::cout << "Current time in seconds since epoch: " << TimeStamp << std::endl;
@@ -144,7 +149,7 @@ Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPoi
                 }
             }
         }   
-        std::cout << "All candidates failed... decreasing the difficulty..." << std::endl;
+        std::cout << "VISIEMS KANDIDATAMS NEPAVYKO... MAZINAMAS DIFFICULTY..." << std::endl;
         Difficulty--;
     }
 }
