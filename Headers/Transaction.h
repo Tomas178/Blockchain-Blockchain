@@ -29,6 +29,7 @@ class Transaction {
             this->TransakcijosIndex = TransakcijosIndex;
         }
 
+
         void SetTransactionID() {this->TransactionID = Maisos_funkcija(GetSender() + GetReceiver() + std::to_string(GetAmount()));};
         void SetSender(std::string Sender) {this->Sender = Sender;};
         void SetReceiver(std::string Receiver) {this->Receiver = Receiver;};

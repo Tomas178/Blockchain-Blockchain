@@ -20,13 +20,19 @@ int main(){
     std::vector<Transaction> transactions(TransactionsCount);
     std::vector<std::vector<Transaction>> Kandidatu_sarasas;
 
-
     std::cout << "Vyksta 1 uzduotis... Generuojama 1000 tinklo vartotoju" << std::endl;
     GenerateUsers(UsersCount, users);
     std::cout << "Vartotoju duomenys galima rasti Vartotojai.txt" << std::endl << std::endl;
     
     std::cout << "Vyksta 2 uzduotis... Generuojama 10000 tinklo transakciju" << std::endl;
     GenerateTransactions(TransactionsCount, transactions, users);
+
+    std::ofstream("Transakcijos.txt");
+    for(int i = 0; i < transactions.size(); i++){
+        std::ofstream RF("Transakcijos.txt");
+        RF << std::left << std::setw(70) << transactions[i].GetTransactionID() << std::setw(70) << transactions[i].GetSender() <<
+        std::setw(70) << transactions[i].GetReceiver() << std::setw(15) << transactions[i].GetAmount() << std::setw(15) << transactions[i].GetTransakcijosIndex() << std::endl;
+    }
     std::cout << "Transakciju duomenys galima rasti Transakcijos.txt" << std::endl << std::endl;
 
     std::cout << "Generuojami kandidatai..." << std::endl;
@@ -40,11 +46,6 @@ int main(){
     std::cout << "Daromos transakcijos kasejams..." << std::endl;
     AtliktiTransakcijas(transactions, Blockchain_Head->GetTransactions(), users);
     std::cout << "Transakcijos atliktos sekmingai." << std::endl << std::endl;
-
-    std::cout << "Atnaujinti vartotoju balansai:" << std::endl;
-    for(Transaction transakcija : transactions){
-        std::cout << "Siuntejas: " << transakcija.GetSender() << " Gavejas: " << transakcija.GetReceiver() << " Suma: " << transakcija.GetAmount() << std::endl;
-    }
 
     std::cout << "Genesis bloko informacija: " << std::endl;
     IsvestiBloka(WinnerID, BlockCount, Blockchain_Head);

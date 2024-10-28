@@ -42,10 +42,6 @@ Transaction GeneruotiTransakcija(User& Sender, User& Receiver, int TransakcijosI
 }
 
 void GenerateTransactions(int kiekis, std::vector<Transaction>& transactions, std::vector<User>& users){
-    std::ofstream RF("Transakcijos.txt");
-
-    RF << std::left << std::setw(70) << "Transaasdasakcijos ID:" << std::setw(70) << "Siuntejas:" << std::setw(70) << "Gavejas:" << std::setw(15) << "Suma:" << std::setw(15) << std::endl;
-
     for(int i = 0; i < kiekis; i++){ 
         int SenderIndex = RandomSkaicius(0, users.size()-1);
         while(users[SenderIndex].GetBalansas() <= 0) SenderIndex = RandomSkaicius(0, users.size()-1);
@@ -55,9 +51,6 @@ void GenerateTransactions(int kiekis, std::vector<Transaction>& transactions, st
         Transaction transaction = GeneruotiTransakcija(users[SenderIndex], users[ReceiverIndex], i);
 
         transactions.push_back(transaction);
-
-        RF << std::left << std::setw(70) << transactions[i].GetTransactionID() << std::setw(70) << transactions[i].GetSender() <<
-        std::setw(70) << transactions[i].GetReceiver() << std::setw(15) << transactions[i].GetAmount() << std::setw(15) << transactions[i].GetTransakcijosIndex() << std::endl;
     }
 }
 
