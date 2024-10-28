@@ -3,11 +3,13 @@
 
 #include "funkcijos.h"
 #include <ctime>
+#include "HashPointer.h"
 #include "Transaction.h"
 
 class Block {
     private:
-        std::string PreviousHash;
+        HashPointer<Block> PreviousBlock;
+        std::string MasterHash;
         std::time_t Timestamp;
         std::string Version;
         std::string MerkleHash;
@@ -16,18 +18,17 @@ class Block {
         std::vector<Transaction> Transactions;
 
     public:
-        Block() {};
+        Block(std::string PreviousHash, Block* PreviousBlockPointer, std::string MasterHash, std::time_t TimeStamp, std::string Version, int Difficulty, int Nonce, std::string MerkelHash, std::vector<Transaction> Transactions) :
+            PreviousBlock{PreviousHash, PreviousBlockPointer},
+            MasterHash{MasterHash},
+            Timestamp{TimeStamp},
+            Version{Version},
+            MerkleHash{MerkelHash},
+            Nonce{Nonce},
+            Difficulty{Difficulty},
+            Transactions{Transactions} {};
+        
 
-        Block(std::string PreviousHash, std::time_t TimeStamp, std::string Version, int Difficulty, std::string MerkelHash, std::vector<Transaction> Transactions){
-            this->PreviousHash = PreviousHash;
-            this->Timestamp = TimeStamp;
-            this->Version = Version;
-            this->Difficulty = Difficulty;
-            this->Transactions = Transactions;
-            this->MerkleHash = MerkelHash;
-        }
-
-        void SetPreviousHash(std::string PreviousHash) {this->PreviousHash = PreviousHash;};
         void SetTimestamp(std::time_t Timestamp) {this->Timestamp = Timestamp;};
         void SetVersion(std::string Version) {this->Version = Version;};
         void SetMerkleHash(std::string MerkleHash) {this->MerkleHash = MerkleHash;};
@@ -35,7 +36,6 @@ class Block {
         void SetDifficulty(int Difficulty) {this->Difficulty = Difficulty;};
         void SetTransactions(std::vector<Transaction> Transactions) {this->Transactions = Transactions;};
 
-        std::string GetPreviousHash() const {return PreviousHash;};
         std::time_t GetTimestamp() const {return Timestamp;};
         std::string GetVersion() const {return Version;};
         std::string GetMerkleHash() const {return MerkleHash;};
@@ -43,6 +43,9 @@ class Block {
         int GetDifficulty() const {return Difficulty;};
         std::vector<Transaction> GetTransactions() const {return Transactions;};
 
+        ~Block(){
+            PreviousBlock.~HashPointer();
+        };
 };
 
 #endif

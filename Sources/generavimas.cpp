@@ -7,6 +7,7 @@ void GenerateUsers(int kiekis, std::vector<User>& users){
     std::ofstream RF("Vartotojai.txt");
 
     for(int i = 0; i < kiekis; i++){
+        users[i] = User();
         users[i].SetName("Vardas" + std::to_string(i+1));
         users[i].SetPublicKey(Maisos_funkcija(RandomStringGeneravimas(64)));
         users[i].SetBalansas(std::round(RandomSkaicius(100.00, 1000000.00)*100.00)/100.00);
@@ -54,6 +55,7 @@ void GenerateTransactions(int kiekis, std::vector<Transaction>& transactions){
     std::ofstream RF("Transakcijos.txt");
 
     for(int i = 0; i < kiekis; i++){ 
+        transactions[i] = Transaction();
         transactions[i].SetSender(RandomStringGeneravimas(64));
         transactions[i].SetReceiver(RandomStringGeneravimas(64));
         transactions[i].SetAmount(RandomSkaicius(100.00,1000000.00));
@@ -88,37 +90,66 @@ std::vector<std::vector<Transaction>> GenerateCandidates(std::vector<Transaction
 
     for(int i = 0; i < kandidatu_kiekis; i++){
         std::vector<Transaction> Kandidatai;
+        Kandidatai.reserve(transakciju_kiekis);
 
         for(int j = 0; j < transakciju_kiekis; j++){
             int kandidato_indeksas = RandomSkaicius(0, Kandidatu_saraso_kopija.size()-1);
             Kandidatai.push_back(Kandidatu_saraso_kopija[kandidato_indeksas]);
             Kandidatu_saraso_kopija.erase(Kandidatu_saraso_kopija.begin() + kandidato_indeksas);
         }
-        
         Kandidatu_sarasas.push_back(Kandidatai);
     }
     return Kandidatu_sarasas;
 }
 
-Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas){
-    int Max_Bandymai = 1000000;
-    int Nonce = 0;
+Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas){
+    int Max_Bandymai = 10000;
 
     while(true){
         bool mined = false;
 
         for(int i = 0; i <= Kandidatu_sarasas.size(); i++){
+            int Nonce = 0;
             std::string MasterString = "";
             std::string MasterHash = "";
 
-            //std::string Merker_Root_Hash = 
+            std::string Merkel_Root_Hash = create_merkle(Kandidatu_sarasas[i]);
+            std::cout << Merkel_Root_Hash << std::endl;
+
+
+            for(int j = 0; j < Max_Bandymai; j++){
+                double randomskaicius = RandomSkaicius(0.0, 999999.0);
+                Nonce = std::round(randomskaicius);
+                MasterString = std::to_string(Nonce) + PreviousHash + Version + Merkel_Root_Hash + std::to_string(Difficulty);
+                MasterHash = Maisos_funkcija(MasterString);
+                //std::cout << "MasterString = "<< MasterString << std::endl;
+                //std::cout << "MasterHash = "<< MasterHash << std::endl;
+
+                for(int i = 0; i < Difficulty; i++){
+                    if(MasterHash[i] != '0') break;
+                    if(i == Difficulty - 1) mined = true;
+                }
+
+                if(mined){
+                    WinnerID = i+1;
+                    std::time_t TimeStamp = std::time(nullptr);
+
+                    // Output the time in seconds since the epoch
+                    std::cout << "Current time in seconds since epoch: " << TimeStamp << std::endl;
+
+                    // Optionally, convert to a human-readable format
+                    std::cout << "Human-readable time: " << std::ctime(&TimeStamp); // std::ctime converts time_t to a string
+
+                    return Block(PreviousHash, PreviousBlockPointer, MasterHash, TimeStamp, Version, Difficulty, Nonce, Merkel_Root_Hash, Kandidatu_sarasas[i]);
+                }
+            }
         }   
-
+        std::cout << "All candidates failed... decreasing the difficulty..." << std::endl;
+        Difficulty--;
     }
-
 }
 
-/*std::string create_merkle(std::vector<Transaction> transactions)
+std::string create_merkle(std::vector<Transaction> transactions)
 {
 
     bc::hash_list merkle = {};
@@ -126,14 +157,14 @@ Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPoi
     for(int i = 0; i<transactions.size(); i++) {
 
         char char_array[65];
-        strcpy(char_array, transactions[i].GetTransactionID.c_str());
+        strcpy(char_array, transactions[i].GetTransactionID().c_str());
         
         bc::hash_digest temp_hash = bc::hash_literal(char_array);
         merkle.push_back(temp_hash);
     }
 
     // Stop if hash list is empty or contains one element
-    if (merkle.empty()) return bc::base16(bc::null_hash);
+    if (merkle.empty()) return bc::encode_base16(bc::null_hash);
     else if (merkle.size() == 1) return bc::encode_base16(merkle[0]);
 
 
@@ -171,4 +202,4 @@ Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPoi
     }
     // Finally we end up with a single item.
     return bc::encode_base16(merkle[0]);
-}*/
+}
