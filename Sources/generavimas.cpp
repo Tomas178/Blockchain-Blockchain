@@ -10,7 +10,7 @@ void GenerateUsers(int kiekis, std::vector<User>& users){
         users[i] = User();
         users[i].SetName("Vardas" + std::to_string(i+1));
         users[i].SetPublicKey(Maisos_funkcija(RandomStringGeneravimas(64)));
-        users[i].SetBalansas(std::round(RandomSkaicius(100.00, 1000000.00)*100.00)/100.00);
+        users[i].SetBalansas(RandomSkaicius(100, 1000000));
     }
 
     for(int i = 0; i < kiekis; i++){
@@ -31,6 +31,36 @@ void GenerateUsers(int kiekis, std::vector<User>& users){
     }
 }
 
+Transaction GeneruotiTransakcija(User& Sender, User& Receiver, int TransakcijosIndex){
+    Transaction transaction(
+        Sender.GetPublicKey(),
+        Receiver.GetPublicKey(),
+        RandomSkaicius(1, Sender.GetBalansas()),
+        TransakcijosIndex
+    );
+    return transaction;
+}
+
+void GenerateTransactions(int kiekis, std::vector<Transaction>& transactions, std::vector<User>& users){
+    std::ofstream RF("Transakcijos.txt");
+
+    RF << std::left << std::setw(70) << "Transaasdasakcijos ID:" << std::setw(70) << "Siuntejas:" << std::setw(70) << "Gavejas:" << std::setw(15) << "Suma:" << std::setw(15) << std::endl;
+
+    for(int i = 0; i < kiekis; i++){ 
+        int SenderIndex = RandomSkaicius(0, users.size()-1);
+        while(users[SenderIndex].GetBalansas() <= 0) SenderIndex = RandomSkaicius(0, users.size()-1);
+
+        int ReceiverIndex = (SenderIndex > 0) ? SenderIndex - 1 : SenderIndex + 1;
+
+        Transaction transaction = GeneruotiTransakcija(users[SenderIndex], users[ReceiverIndex], i);
+
+        transactions.push_back(transaction);
+
+        RF << std::left << std::setw(70) << transactions[i].GetTransactionID() << std::setw(70) << transactions[i].GetSender() <<
+        std::setw(70) << transactions[i].GetReceiver() << std::setw(15) << transactions[i].GetAmount() << std::setw(15) << transactions[i].GetTransakcijosIndex() << std::endl;
+    }
+}
+
 std::string RandomStringGeneravimas(int ilgis) {
     std::string simboliu_seka = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     std::string random_string;
@@ -44,41 +74,11 @@ std::string RandomStringGeneravimas(int ilgis) {
     return random_string;
 }
 
-double RandomSkaicius(double low, double high){
+int RandomSkaicius(int low, int high){
     std::random_device rd;
     std::mt19937 generator(rd());
-    std::uniform_real_distribution<double> distribution(low, high);
+    std::uniform_int_distribution<int> distribution(low, high);
     return distribution(generator);
-}
-
-void GenerateTransactions(int kiekis, std::vector<Transaction>& transactions){
-    std::ofstream RF("Transakcijos.txt");
-
-    for(int i = 0; i < kiekis; i++){ 
-        transactions[i] = Transaction();
-        transactions[i].SetSender(RandomStringGeneravimas(64));
-        transactions[i].SetReceiver(RandomStringGeneravimas(64));
-        transactions[i].SetAmount(RandomSkaicius(100.00,1000000.00));
-        transactions[i].SetTransactionID();
-        //transactions[i] = Transaction(RandomStringGeneravimas(64), RandomStringGeneravimas(64), RandomSkaicius());
-    }
-
-    /*for(int i = 0; i < kiekis; i++){
-        for(int j = 0; j < kiekis; j++){
-            if(transactions[i].GetTransactionID() == transactions[j].GetTransactionID() && i != j){
-                std::cout << "RASTA SUTAMPANCIU TRANSACTIONID... TRANSAKCIJOS NEBEGENERUOJAMOS" << std::endl;
-                exit(1);
-            }
-        }
-    }
-
-    std::cout << "Viskas good! Nera sutampanciu TransactionID" << std::endl;*/
-
-    RF << std::left << std::setw(70) << "Transakcijos ID:" << std::setw(70) << "Siuntejas:" << std::setw(70) << "Gavejas:" << std::setw(15) << "Suma:" << std::endl;
-    for(int i = 0; i < kiekis; i++){
-        RF << std::left << std::setw(70) << transactions[i].GetTransactionID() << std::setw(70) << transactions[i].GetSender() <<
-        std::setw(70) << transactions[i].GetReceiver() << std::setw(15) << transactions[i].GetAmount() << std::endl;
-    }
 }
 
 std::vector<std::vector<Transaction>> GenerateCandidates(std::vector<Transaction>& transactions, int BlockSize){
@@ -117,7 +117,7 @@ Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPoi
 
 
             for(int j = 0; j < Max_Bandymai; j++){
-                double randomskaicius = RandomSkaicius(0.0, 999999.0);
+                double randomskaicius = RandomSkaicius(0, 999999);
                 Nonce = std::round(randomskaicius);
                 MasterString = std::to_string(Nonce) + PreviousHash + Version + Merkel_Root_Hash + std::to_string(Difficulty);
                 MasterHash = Maisos_funkcija(MasterString);
@@ -207,4 +207,62 @@ std::string create_merkle(std::vector<Transaction> transactions)
     }
     // Finally we end up with a single item.
     return bc::encode_base16(merkle[0]);
+}
+
+void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Transaction> BlockTransactions, std::vector<User>& users){
+
+    for(Transaction transaction : BlockTransactions){
+        std::string SenderPubKey = transaction.GetSender();
+        std::string ReceiverPubKey = transaction.GetReceiver();
+
+        for(int i = 0; i < users.size(); i++){
+            if(users[i].GetPublicKey() == SenderPubKey) users[i].SetBalansas(users[i].GetBalansas() - transaction.GetAmount());
+            if(users[i].GetPublicKey() == ReceiverPubKey) users[i].SetBalansas(users[i].GetBalansas() + transaction.GetAmount());
+        }
+
+        for(int i = 0; i < transactions.size(); i++){
+            if(transactions[i].GetTransactionID() == transaction.GetTransactionID()){
+                transactions.erase(transactions.begin() + i);
+                break;
+            }
+        }
+    }
+}
+
+void IsvestiBloka(int WinnerID, int BlockCount, Block* Block){
+
+    std::vector<Transaction> BlockTransactions = Block->GetTransactions();
+
+    std::string failo_pavadinimas = "Isvedimai/Blokas-" + std::to_string(BlockCount) + ".txt";
+
+    std::cout << "Failo pavadinimas: " << failo_pavadinimas << std::endl;
+    std::ofstream RF(failo_pavadinimas);
+    if (!RF.is_open()) {
+    std::cerr << "Failed to open file: " << failo_pavadinimas << std::endl;
+    return; // Or handle the error appropriately
+}
+
+    RF << "BLOCK: " << BlockCount << std::endl;
+    RF << "WinnerID: " << WinnerID << std::endl;
+    RF << std::string(50, '-') << std::endl;
+
+    RF << "BLOCK HASH: " << Block->GetMasterHash() << std::endl;
+    RF << "PREVIOUS HASH: " << Block->GetPreviousHash() << std::endl;
+    RF << "ISKASIMO LAIKAS: " << Block->GetTimeStamp();
+    RF << "TRANSAKCIJU KIEKIS: " << BlockTransactions.size() << std::endl;
+    RF << "DIFFICULTY: " << Block->GetDifficulty() << std::endl;
+    RF << "MERKLE ROOT HASH: " << Block->GetMerkleHash() << std::endl;
+    RF << "VERSION: " << Block->GetVersion() << std::endl;
+    RF << "NONCE: " << Block->GetNonce() << std::endl;
+
+    RF << std::string(50, '-') << std::endl;
+    RF << "BLOKO TRANSAKCIJOS: " << std::endl << std::endl;
+
+    for(Transaction transaction : BlockTransactions){
+        RF << "ID: " << transaction.GetTransactionID() << std::endl;
+        RF << "Siuntejas: " << transaction.GetSender() << std::endl;
+        RF << "Gavejas: " << transaction.GetReceiver() << std::endl;
+        RF << "Suma: " << transaction.GetAmount() << std::endl;
+        RF << std::endl;
+    }
 }

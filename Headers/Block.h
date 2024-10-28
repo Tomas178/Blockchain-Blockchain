@@ -12,7 +12,7 @@ class Block {
         std::string PreviousHash;
         Block* PreviousBlockPointer;
         std::string MasterHash;
-        std::time_t Timestamp;
+        std::string TimeStamp;
         std::string Version;
         std::string MerkleHash;
         int Nonce = 0;
@@ -25,26 +25,27 @@ class Block {
             PreviousHash{PreviousHash},
             PreviousBlockPointer{PreviousBlockPointer},
             MasterHash{MasterHash},
-            Timestamp{TimeStamp},
+            TimeStamp{std::ctime(&TimeStamp)},
             Version{Version},
             MerkleHash{MerkelHash},
             Nonce{Nonce},
             Difficulty{Difficulty},
             Transactions{Transactions} {};
         
-
+        void SetMasterHash(std::string MasterHash) {this->MasterHash = MasterHash;};
         void SetPreviousHash(std::string PreviousHash) {this->PreviousHash = PreviousHash;};
         void SetPreviousBlockPointer(Block* PreviousBlockPointer) {this->PreviousBlockPointer = PreviousBlockPointer;};
-        void SetTimestamp(std::time_t Timestamp) {this->Timestamp = Timestamp;};
+        void SetTimeStamp(std::time_t TimeStamp) {this->TimeStamp = std::ctime(&TimeStamp);};
         void SetVersion(std::string Version) {this->Version = Version;};
         void SetMerkleHash(std::string MerkleHash) {this->MerkleHash = MerkleHash;};
         void SetNonce(int Nonce) {this->Nonce = Nonce;};
         void SetDifficulty(int Difficulty) {this->Difficulty = Difficulty;};
         void SetTransactions(std::vector<Transaction> Transactions) {this->Transactions = Transactions;};
 
+        std::string GetMasterHash() const {return MasterHash;};
         std::string GetPreviousHash() const {return PreviousHash;};
         Block* GetPreviousBlockPointer() const {return PreviousBlockPointer;}; 
-        std::time_t GetTimestamp() const {return Timestamp;};
+        std::string GetTimeStamp() const {return TimeStamp;};
         std::string GetVersion() const {return Version;};
         std::string GetMerkleHash() const {return MerkleHash;};
         int GetNonce() const {return Nonce;};

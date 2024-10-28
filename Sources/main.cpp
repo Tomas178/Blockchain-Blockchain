@@ -11,7 +11,7 @@ int main(){
     int BlockSize = 100;
     std::string GenesisPreviousHash = "Tomas";
     Block* Blockchain_Head;
-    int Difficulty = 9;
+    int Difficulty = 5;
     int WinnerID = 0;
     std::string Version = "1.0";
     int BlockCount = 0;
@@ -26,7 +26,7 @@ int main(){
     std::cout << "Vartotoju duomenys galima rasti Vartotojai.txt" << std::endl << std::endl;
     
     std::cout << "Vyksta 2 uzduotis... Generuojama 10000 tinklo transakciju" << std::endl;
-    GenerateTransactions(TransactionsCount, transactions);
+    GenerateTransactions(TransactionsCount, transactions, users);
     std::cout << "Transakciju duomenys galima rasti Transakcijos.txt" << std::endl << std::endl;
 
     std::cout << "Generuojami kandidatai..." << std::endl;
@@ -35,7 +35,21 @@ int main(){
 
     std::cout << "Kasamas Genesis Blokas..." << std::endl;
     Blockchain_Head = new Block(MineBlock(WinnerID, GenesisPreviousHash, nullptr, Version, Difficulty, Kandidatu_sarasas));
-    std::cout << "Genesis blokas iskastas sekmingai:)" << std::endl;
+    std::cout << "Genesis blokas iskastas sekmingai:)" << std::endl << std::endl;
+
+    std::cout << "Daromos transakcijos kasejams..." << std::endl;
+    AtliktiTransakcijas(transactions, Blockchain_Head->GetTransactions(), users);
+    std::cout << "Transakcijos atliktos sekmingai." << std::endl << std::endl;
+
+    std::cout << "Atnaujinti vartotoju balansai:" << std::endl;
+    for(Transaction transakcija : transactions){
+        std::cout << "Siuntejas: " << transakcija.GetSender() << " Gavejas: " << transakcija.GetReceiver() << " Suma: " << transakcija.GetAmount() << std::endl;
+    }
+
+    std::cout << "Genesis bloko informacija: " << std::endl;
+    IsvestiBloka(WinnerID, BlockCount, Blockchain_Head);
+    std::cout << "Genesis bloko informacija isvesta .txt faile!" << std::endl << std::endl;
+
     BlockCount++;
 
     return 0;

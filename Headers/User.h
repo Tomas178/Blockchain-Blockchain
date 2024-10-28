@@ -8,12 +8,12 @@ class User {
     private:
         std::string Name;
         std::string PublicKey;
-        double Balance;
+        int Balance;
 
     public:
-        User() : Name(""), PublicKey(""), Balance(0.0) {}
+        User() : Name(""), PublicKey(""), Balance(0) {}
 
-        User(std::string Name, std::string PublicKey, double Balance){
+        User(std::string Name, std::string PublicKey, int Balance){
             this->Name = Name;
             this->PublicKey = PublicKey;
             this->Balance = Balance;
@@ -21,11 +21,11 @@ class User {
 
         std::string GetName() const {return Name;};
         std::string GetPublicKey() const {return PublicKey;};
-        double GetBalansas() const {return Balance;};
+        int GetBalansas() const {return Balance;};
 
         void SetName(const std::string Name) {this->Name = Name;};
         void SetPublicKey(const std::string PublicKey) {this->PublicKey = PublicKey;};
-        void SetBalansas(const double Balance) {this->Balance = Balance;};
+        void SetBalansas(const int Balance) {this->Balance = Balance;};
 };
 
 #endif
