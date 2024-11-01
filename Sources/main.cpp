@@ -25,14 +25,16 @@ int main(){
     std::cout << "Vartotoju duomenys galima rasti Vartotojai.txt" << std::endl << std::endl;
     
     std::cout << "Vyksta 2 uzduotis... Generuojama 10000 tinklo transakciju" << std::endl;
-    GenerateTransactions(TransactionsCount, transactions, users);
+    transactions = GenerateTransactions(TransactionsCount, users);
 
-    std::ofstream("Transakcijos.txt");
+    std::cout << "Transakciju kiekis: " << transactions.size() << std::endl;
+    std::ofstream RF("Transakcijos.txt");
+    RF << std::left << std::setw(70) << "Transakcijos ID" << std::setw(70) << "Siuntejas" << std::setw(70) << "Gavejas" << std::setw(15) << "Suma" << std::endl;
     for(int i = 0; i < transactions.size(); i++){
-        std::ofstream RF("Transakcijos.txt");
         RF << std::left << std::setw(70) << transactions[i].GetTransactionID() << std::setw(70) << transactions[i].GetSender() <<
-        std::setw(70) << transactions[i].GetReceiver() << std::setw(15) << transactions[i].GetAmount() << std::setw(15) << transactions[i].GetTransakcijosIndex() << std::endl;
+        std::setw(70) << transactions[i].GetReceiver() << std::setw(15) << transactions[i].GetAmount() << std::endl;
     }
+    RF.close();
     std::cout << "Transakciju duomenys galima rasti Transakcijos.txt" << std::endl << std::endl;
 
     std::cout << "Generuojami kandidatai..." << std::endl;
@@ -47,9 +49,21 @@ int main(){
     AtliktiTransakcijas(transactions, Blockchain_Head->GetTransactions(), users);
     std::cout << "Transakcijos atliktos sekmingai." << std::endl << std::endl;
 
+    std::cout << "Isvedami vartotoju balansai po transakciju..." << std::endl;
+    std::ofstream RF2("Vartotojai_Po_Transakciju.txt");
+    RF2 << std::left << std::setw(20) << "Vartotojo vardas:" << std::setw(70) << "PublicKey:" << std::setw(15) << "Balansas:" << std::endl;
+    for(int i = 0; i < users.size(); i++){
+        RF2 << std::left << std::setw(20) << users[i].GetName() << std::setw(70) <<
+        users[i].GetPublicKey() << std::setw(15) << users[i].GetBalansas() << std::endl;
+    }
+    RF2.close();
+    std::cout << "Vartotoju balansai po transakciju galima rasti Vartotojai_Po_Transakciju.txt" << std::endl << std::endl;
+
     std::cout << "Genesis bloko informacija: " << std::endl;
     IsvestiBloka(WinnerID, BlockCount, Blockchain_Head);
     std::cout << "Genesis bloko informacija isvesta .txt faile!" << std::endl << std::endl;
+
+    std::cout << "Likes transakciju kiekis: " << transactions.size() << std::endl;
 
     BlockCount++;
 
