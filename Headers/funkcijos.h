@@ -22,7 +22,7 @@ void Salt(std::string& simboliu_seka);
 std::string Maisos_funkcija(const std::string simboliu_seka);
 void GenerateUsers(int kiekis, std::vector<User>& users);
 Transaction GeneruotiTransakcija(User& Sender, User& Receiver, int TransakcijosIndex);
-void GenerateTransactions(int kiekis, std::vector<Transaction>& transactions, std::vector<User>& users);
+std::vector<Transaction> GenerateTransactions(int kiekis, std::vector<User>& users);
 std::string RandomStringGeneravimas(int ilgis);
 int RandomSkaicius(int low, int high);
 std::vector<std::vector<Transaction>> GenerateCandidates(std::vector<Transaction>& transactions, int BlockSize);

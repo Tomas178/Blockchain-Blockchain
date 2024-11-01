@@ -31,27 +31,22 @@ void GenerateUsers(int kiekis, std::vector<User>& users){
     }
 }
 
-Transaction GeneruotiTransakcija(User& Sender, User& Receiver, int TransakcijosIndex){
-    Transaction transaction(
-        Sender.GetPublicKey(),
-        Receiver.GetPublicKey(),
-        RandomSkaicius(1, Sender.GetBalansas()),
-        TransakcijosIndex
-    );
-    return transaction;
-}
-
-void GenerateTransactions(int kiekis, std::vector<Transaction>& transactions, std::vector<User>& users){
+std::vector<Transaction> GenerateTransactions(int kiekis, std::vector<User>& users){
+    std::vector<Transaction> transactions = {};
+    transactions.reserve(kiekis);
     for(int i = 0; i < kiekis; i++){ 
-        int SenderIndex = RandomSkaicius(0, users.size()-1);
-        while(users[SenderIndex].GetBalansas() <= 0) SenderIndex = RandomSkaicius(0, users.size()-1);
-
-        int ReceiverIndex = (SenderIndex > 0) ? SenderIndex - 1 : SenderIndex + 1;
-
-        Transaction transaction = GeneruotiTransakcija(users[SenderIndex], users[ReceiverIndex], i);
-
-        transactions.push_back(transaction);
+        User Sender, Receiver;
+        do{
+            Sender = users.at(RandomSkaicius(0, users.size()-1));
+            Receiver = users.at(RandomSkaicius(0, users.size()-1));
+        } while(Sender.GetPublicKey() == Receiver.GetPublicKey());
+        int amount = RandomSkaicius(1, Sender.GetBalansas());
+        if(!Sender.GetPublicKey().empty() && !Receiver.GetPublicKey().empty() && amount > 0){
+            transactions.push_back(Transaction(Sender.GetPublicKey(), Receiver.GetPublicKey(), amount));
+        }
     }
+    std::cout << "Transakcijos sugeneruotos sekmingai" << std::endl;
+    return transactions;
 }
 
 std::string RandomStringGeneravimas(int ilgis) {
@@ -207,10 +202,25 @@ void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Tra
     for(Transaction transaction : BlockTransactions){
         std::string SenderPubKey = transaction.GetSender();
         std::string ReceiverPubKey = transaction.GetReceiver();
+        int SenderIndex = -1;
+        int ReceiverIndex = -1;
 
         for(int i = 0; i < users.size(); i++){
-            if(users[i].GetPublicKey() == SenderPubKey) users[i].SetBalansas(users[i].GetBalansas() - transaction.GetAmount());
-            if(users[i].GetPublicKey() == ReceiverPubKey) users[i].SetBalansas(users[i].GetBalansas() + transaction.GetAmount());
+            if(SenderPubKey == users[i].GetPublicKey()) SenderIndex = i;
+            else if (ReceiverPubKey == users[i].GetPublicKey()) ReceiverIndex = i;
+        }
+        if(SenderIndex == -1 || ReceiverIndex == -1){
+            std::cout << "NERASTAS VARTOTOJAS... TRANSAKCIJA NEATLIKTA" << std::endl;
+            break;
+        }
+
+        if(users[SenderIndex].GetBalansas() >= transaction.GetAmount()){
+            users[SenderIndex].SetBalansas(users[SenderIndex].GetBalansas() - transaction.GetAmount());
+            users[ReceiverIndex].SetBalansas(users[ReceiverIndex].GetBalansas() + transaction.GetAmount());
+        }
+        else{
+            std::cout << "NEPAKANKAMAS BALANSAS... TRANSAKCIJA NEATLIKTA" << std::endl;
+            break;
         }
 
         for(int i = 0; i < transactions.size(); i++){
