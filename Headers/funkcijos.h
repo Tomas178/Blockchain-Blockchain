@@ -12,6 +12,7 @@
 #include <fstream>
 #include <bitcoin/system.hpp>
 #include <list>
+#include <mpi.h>
 
 class User;
 class Transaction;

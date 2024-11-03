@@ -92,6 +92,8 @@ std::vector<std::vector<Transaction>> GenerateCandidates(std::vector<Transaction
 Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas){
     int Max_Bandymai = 100000;
 
+    std::shuffle(Kandidatu_sarasas.begin(), Kandidatu_sarasas.end(), std::mt19937{std::random_device{}()});
+
     while(true){
         bool mined = false;
 
@@ -137,8 +139,8 @@ Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPoi
                 }
             }
         }   
-        std::cout << "VISIEMS KANDIDATAMS NEPAVYKO... MAZINAMAS DIFFICULTY..." << std::endl;
-        Difficulty--;
+        std::cout << "VISIEMS KANDIDATAMS NEPAVYKO... PADIDINAMAS BANDYMU SKAICIUS" << std::endl;
+        Max_Bandymai *= 2;
     }
 }
 
@@ -223,9 +225,11 @@ void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Tra
             continue;
         }
 
-        if(Maisos_funkcija(transaction.GetSender() + transaction.GetReceiver() + std::to_string(transaction.GetAmount())) != transaction.GetTransactionID){
+        std::string txID = Maisos_funkcija(transaction.GetSender() + transaction.GetReceiver() + std::to_string(transaction.GetAmount()));
+
+        if(txID != transaction.GetTransactionID()){
             std::cout << "TRANSAKCIJA NERA VALIDI... NESUTAMPA TRANSACTION ID HASH" << std::endl;
-            std::cout << "Dabar sugeneruotas TRANSAKCIJOS ID: " << Maisos_funkcija(transaction.GetSender() + transaction.GetReceiver() + std::to_string(transaction.GetAmount())) < std::endl;
+            std::cout << "Dabar sugeneruotas TRANSAKCIJOS ID: " << txID << std::endl;
             std::cout << "Is anksciau sugeneruotas TRANSAKCIJOS ID: " << transaction.GetTransactionID() << std::endl;
             continue;
         }

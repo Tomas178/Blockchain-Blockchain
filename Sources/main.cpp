@@ -52,7 +52,7 @@ int main(){
         transactions.end());
     }
 
-    printBlockChain(Blockchain);
+    //printBlockChain(Blockchain);
 
     std::cout << "Daromos transakcijos kasejams..." << std::endl;
     AtliktiTransakcijas(transactions, Blockchain_Head->GetTransactions(), users);
@@ -105,7 +105,7 @@ int main(){
         users[i].GetPublicKey() << std::setw(15) << users[i].GetBalansas() << std::endl;
     }
     RF3.close();
-    std::cout << "Vartotoju balansai po transakciju galima rasti Vartotojai_Po_Visu_Transakciju.txt" << std::endl << std::endl;
+    std::cout << "Vartotoju balansus po transakciju galima rasti Vartotojai_Po_Visu_Transakciju.txt" << std::endl << std::endl;
 
     //printBlockInChain(Blockchain, 2);
     //printBlockChain(Blockchain);
