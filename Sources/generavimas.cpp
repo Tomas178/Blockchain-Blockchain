@@ -198,7 +198,6 @@ std::string create_merkle(std::vector<Transaction> transactions)
 }
 
 void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Transaction> BlockTransactions, std::vector<User>& users){
-
     for(Transaction transaction : BlockTransactions){
         std::string SenderPubKey = transaction.GetSender();
         std::string ReceiverPubKey = transaction.GetReceiver();
@@ -208,10 +207,11 @@ void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Tra
         for(int i = 0; i < users.size(); i++){
             if(SenderPubKey == users[i].GetPublicKey()) SenderIndex = i;
             else if (ReceiverPubKey == users[i].GetPublicKey()) ReceiverIndex = i;
+            if (SenderIndex != -1 && ReceiverIndex != -1) break;
         }
         if(SenderIndex == -1 || ReceiverIndex == -1){
             std::cout << "NERASTAS VARTOTOJAS... TRANSAKCIJA NEATLIKTA" << std::endl;
-            break;
+            continue;
         }
 
         if(users[SenderIndex].GetBalansas() >= transaction.GetAmount()){
@@ -219,15 +219,8 @@ void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Tra
             users[ReceiverIndex].SetBalansas(users[ReceiverIndex].GetBalansas() + transaction.GetAmount());
         }
         else{
-            std::cout << "NEPAKANKAMAS BALANSAS... TRANSAKCIJA NEATLIKTA" << std::endl;
-            break;
-        }
-
-        for(int i = 0; i < transactions.size(); i++){
-            if(transactions[i].GetTransactionID() == transaction.GetTransactionID()){
-                transactions.erase(transactions.begin() + i);
-                break;
-            }
+            std::cout << "NEPAKANKAMAS BALANSAS... TRANSAKCIJA NEATLIKTA, KURIOS ID: " << transaction.GetTransactionID() << std::endl;
+            continue;
         }
     }
 }
@@ -268,4 +261,30 @@ void IsvestiBloka(int WinnerID, int BlockCount, Block* Block){
         RF << "Suma: " << transaction.GetAmount() << std::endl;
         RF << std::endl;
     }
+}
+
+void printBlockChain(std::list<Block> &chain){
+    int i = 0;
+    std::cout << std::endl << "Galutinė sugeneruota blokų grandinė: \n" << std::endl;
+    for(auto block : chain){
+        std::cout << i << " Blokas:" << std::endl;
+        std::cout << "hash: " << block.GetMasterHash() << std::endl;
+        std::cout << "praito hash: " << block.GetPreviousHash() << std::endl;
+        std::cout << "txs: " << block.GetTransactions().size() << " - " << block.GetMerkleHash() << std::endl;
+        std::cout << "nonce: " << block.GetNonce() << std::endl;
+        std::cout << std::endl;
+        i++;
+    }
+}
+
+void printBlockInChain(std::list<Block> &chain, int index){
+    index = std::abs(index);
+    if(index >= chain.size()){
+        std::cout << "Indeksas " << index << " blokų grandinėje neegzistuoja." << std::endl;
+        return;
+    }
+    std::cout << index + 1 << "-asis blokas grandinėje:" << std::endl;
+    std::list<Block>::iterator block = chain.begin();
+    std::advance(block, index);
+    block->print();
 }

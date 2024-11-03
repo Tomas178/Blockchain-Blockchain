@@ -11,6 +11,7 @@
 #include <random>
 #include <fstream>
 #include <bitcoin/system.hpp>
+#include <list>
 
 class User;
 class Transaction;
@@ -30,6 +31,8 @@ Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPoi
 std::string create_merkle(std::vector<Transaction> transactions);
 void IsvestiBloka(int WinnerID, int BlockCount, Block* Block);
 void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Transaction> BlockTransactions, std::vector<User>& users);
+void printBlockChain(std::list<Block> &chain);
+void printBlockInChain(std::list<Block> &chain, int index);
 
 extern std::string simboliu_seka;
 
