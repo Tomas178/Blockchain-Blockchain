@@ -222,6 +222,13 @@ void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Tra
             std::cout << "NEPAKANKAMAS BALANSAS... TRANSAKCIJA NEATLIKTA, KURIOS ID: " << transaction.GetTransactionID() << std::endl;
             continue;
         }
+
+        if(Maisos_funkcija(transaction.GetSender() + transaction.GetReceiver() + std::to_string(transaction.GetAmount())) != transaction.GetTransactionID){
+            std::cout << "TRANSAKCIJA NERA VALIDI... NESUTAMPA TRANSACTION ID HASH" << std::endl;
+            std::cout << "Dabar sugeneruotas TRANSAKCIJOS ID: " << Maisos_funkcija(transaction.GetSender() + transaction.GetReceiver() + std::to_string(transaction.GetAmount())) < std::endl;
+            std::cout << "Is anksciau sugeneruotas TRANSAKCIJOS ID: " << transaction.GetTransactionID() << std::endl;
+            continue;
+        }
     }
 }
 
