@@ -198,7 +198,6 @@ std::string create_merkle(std::vector<Transaction> transactions)
 }
 
 void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Transaction> BlockTransactions, std::vector<User>& users){
-
     for(Transaction transaction : BlockTransactions){
         std::string SenderPubKey = transaction.GetSender();
         std::string ReceiverPubKey = transaction.GetReceiver();
@@ -208,10 +207,11 @@ void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Tra
         for(int i = 0; i < users.size(); i++){
             if(SenderPubKey == users[i].GetPublicKey()) SenderIndex = i;
             else if (ReceiverPubKey == users[i].GetPublicKey()) ReceiverIndex = i;
+            if (SenderIndex != -1 && ReceiverIndex != -1) break;
         }
         if(SenderIndex == -1 || ReceiverIndex == -1){
             std::cout << "NERASTAS VARTOTOJAS... TRANSAKCIJA NEATLIKTA" << std::endl;
-            break;
+            continue;
         }
 
         if(users[SenderIndex].GetBalansas() >= transaction.GetAmount()){
@@ -220,15 +220,12 @@ void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Tra
         }
         else{
             std::cout << "NEPAKANKAMAS BALANSAS... TRANSAKCIJA NEATLIKTA" << std::endl;
-            break;
+            continue;
         }
 
-        for(int i = 0; i < transactions.size(); i++){
-            if(transactions[i].GetTransactionID() == transaction.GetTransactionID()){
-                transactions.erase(transactions.begin() + i);
-                break;
-            }
-        }
+        transactions.erase(std::remove_if(transactions.begin(), transactions.end(),
+        [&transaction](const Transaction& t) { return t.GetTransactionID() == transaction.GetTransactionID(); }),
+        transactions.end());
     }
 }
 

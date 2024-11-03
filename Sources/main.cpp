@@ -62,10 +62,25 @@ int main(){
     std::cout << "Genesis bloko informacija: " << std::endl;
     IsvestiBloka(WinnerID, BlockCount, Blockchain_Head);
     std::cout << "Genesis bloko informacija isvesta .txt faile!" << std::endl << std::endl;
+    Kandidatu_sarasas.clear();
+    BlockCount++;
 
     std::cout << "Likes transakciju kiekis: " << transactions.size() << std::endl;
 
-    BlockCount++;
+    std::string atsakymas;
+    std::cout << "Ar norite kasti nauja bloka? (y/n)" << std::endl; std::cin >> atsakymas;
+    while(atsakymas == "y"){
+        std::cout << "Generuojami kandidatai..." << std::endl;
+        Kandidatu_sarasas = GenerateCandidates(transactions, BlockSize);
+        std::cout << "Kandidatai sugeneruoti sekmingai." << std::endl << std::endl;
+        Blockchain_Head = new Block(MineBlock(WinnerID, Blockchain_Head->GetMasterHash(), Blockchain_Head, Version, Difficulty, Kandidatu_sarasas));
+        AtliktiTransakcijas(transactions, Blockchain_Head->GetTransactions(), users);
+        IsvestiBloka(WinnerID, BlockCount, Blockchain_Head);
+        Kandidatu_sarasas.clear();
+        BlockCount++;
+        std::cout << "Likes transakciju kiekis: " << transactions.size() << std::endl;
+        std::cout << "Ar norite kasti nauja bloka? (y/n)" << std::endl; std::cin >> atsakymas;
+    }
 
     return 0;
 }
