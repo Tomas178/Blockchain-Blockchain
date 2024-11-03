@@ -52,6 +52,18 @@ class Block {
         int GetDifficulty() const {return Difficulty;};
         std::vector<Transaction> GetTransactions() const {return Transactions;};
 
+        void print(){
+            std::cout << "BLOCK HASH: " << this->MasterHash << std::endl;
+            std::cout << "PREVIOUS HASH: " << this->PreviousHash << std::endl;
+            std::cout << "ISKASIMO LAIKAS: " << this->TimeStamp;
+            std::cout << "TRANSAKCIJU KIEKIS: " << this->Transactions.size() << std::endl;
+            std::cout << "DIFFICULTY: " << this->Difficulty << std::endl;
+            std::cout << "MERKLE ROOT HASH: " << this->MerkleHash << std::endl;
+            std::cout << "VERSION: " << this->Version << std::endl;
+            std::cout << "NONCE: " << this->Nonce << std::endl;
+            std::cout << "PASKUTINES TRANSAKCIJOS ID: " << this->Transactions.back().GetTransactionID() << std::endl << std::endl;
+        }
+
         ~Block() {};
 };
 
