@@ -4,14 +4,27 @@
 #include "../Headers/Block.h"
 #include "../Headers/Data.h"
 
-int main(){
+int main(int argc, char** argv){
+
+    MPI_Init(&argc, &argv);
+
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);  // Get the rank of this process
+    MPI_Comm_size(MPI_COMM_WORLD, &size); // Get the total number of processes 
+
+    if (size < 2) {
+        std::cerr << "This program requires at least 2 processes.\n";
+        MPI_Finalize();
+        return -1;
+    }
 
     int UsersCount = 1000;
+    std::string paralelinis_kasimas;
     int TransactionsCount = 10000;
     int BlockSize = 100;
     std::string GenesisPreviousHash = "Tomas";
     Block* Blockchain_Head;
-    int Difficulty = 5;
+    int Difficulty = 3;
     int WinnerID = 0;
     std::string Version = "1.0";
     int BlockCount = 0;
@@ -21,6 +34,7 @@ int main(){
     std::vector<Transaction> transactions(TransactionsCount);
     std::vector<std::vector<Transaction>> Kandidatu_sarasas;
 
+    if(rank == 0){
     std::cout << "Vyksta 1 uzduotis... Generuojama 1000 tinklo vartotoju" << std::endl;
     GenerateUsers(UsersCount, users);
     std::cout << "Vartotoju duomenys galima rasti Vartotojai.txt" << std::endl << std::endl;
@@ -68,13 +82,14 @@ int main(){
     RF2.close();
     std::cout << "Vartotoju balansai po transakciju galima rasti Vartotojai_Po_Pirmu_Transakciju.txt" << std::endl << std::endl;
 
-    std::cout << "Genesis bloko informacija: " << std::endl;
+    std::cout << "Isvedama Genesis bloko informacija... " << std::endl;
     IsvestiBloka(WinnerID, BlockCount, Blockchain_Head);
     std::cout << "Genesis bloko informacija isvesta .txt faile!" << std::endl << std::endl;
     Kandidatu_sarasas.clear();
     BlockCount++;
 
     std::cout << "Likes transakciju kiekis: " << transactions.size() << std::endl;
+    }
 
     std::string atsakymas;
     std::cout << "Ar norite kasti nauja bloka? (y/n)" << std::endl; std::cin >> atsakymas;
@@ -110,5 +125,13 @@ int main(){
     //printBlockInChain(Blockchain, 2);
     //printBlockChain(Blockchain);
 
+    //std::cout << "Ar norite isbandyti paralelini bloku kasima? (y/n)" << std::endl; std::cin >> paralelinis_kasimas;
+    //}
+    MPI_Barrier(MPI_COMM_WORLD);
+    //if(paralelinis_kasimas == "y"){
+        std::cout << "Procesas: " << rank << " vykdo bloku kasima..." << std::endl;
+    //}
+
+    MPI_Finalize();
     return 0;
 }

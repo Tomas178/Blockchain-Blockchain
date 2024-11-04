@@ -20,6 +20,8 @@ class Block {
         std::vector<Transaction> Transactions;
 
     public:
+        Block() {};
+    
         Block(std::string PreviousHash, Block* PreviousBlockPointer, std::string MasterHash, std::time_t TimeStamp, std::string Version, int Difficulty, int Nonce, std::string MerkelHash, std::vector<Transaction> Transactions) :
             //PreviousBlock{PreviousHash, PreviousBlockPointer},
             PreviousHash{PreviousHash},
