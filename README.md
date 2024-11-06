@@ -1,62 +1,35 @@
-# Project Title
+# Decentralizuotas Blockchain'as
 
-Simple overview of use/purpose.
+### Struktūra
+- User klasė – skirta saugoti duomenys apie vartotoją: vardą, unikalų PublicKey ir turima balansą.
+- Transaction klasė - skirta saugoti duomenys apie transakciją: unikalų TransactionID, Siuntejo **PublicKey**, gavėjo PublicKey ir siunčiamą sumą.
+- Block klasė - skirta saugoti duomenys apie bloką: prieš tai buvusio bloko hash'ą **PreviousHash**, Rodyklę į prieš tai buvusį bloką **PreviousBlockPointer**, pačio bloko hash'ą **MasterHash**, laiko žymą kada buvo iškastas blokas **TimeStamp**, Versiją **Version**, Merkle hash'ą **MerkleHash**, **Nonce**, **Difficulty** ir visas bloko transakcijas **Transactions**.
+- **Hash.cpp** – naudojamas hash'as iš 1 laboratorinio darbo
+- **Generavimas.cpp** – visos papildomos funkcijos, kurios naudojamos programoje, tokios kaip vartojojų generavimas, transakcijų generavimas, blokų kasimas ir t.t.
+- Programoje yra naudojamas gerosios OOP praktikos (enkapsuliavimas, konstruktoriai ir RAII idiomas).
 
-## Description
+### Funkcija **void GenerateUsers(int kiekis, std::vector<User>& users)**
+- Sugeneruoja tiek vartotojų kiek yra jai pateikiama su kintamuoju **kiekis**. Pagal užduoties aprašymą yra generuojama 1000 tinklo vartotojų.
 
-An in-depth paragraph about your project and overview of use.
+### Funkcija **std::vector<Transaction> GenerateTransactions(int kiekis, std::vector<User>& users)**
+- Sugeneruoja tiek transakcijų kiek yra jai pateikiama su kintamuoju **kiekis**. Pagal užduoties aprašymą yra generuojama 10000 transakcijų tinkle.
+- Gražina **kiekis** dydžio vektorių sudarytą iš transakcijų.
 
-## Getting Started
+### Funkcija **std::vector<std::vector<Transaction>> GenerateCandidates(std::vector<Transaction>& transactions, int BlockSize)**
+- Iš transakcijų vektoriaus kiekvienam generuojamam kandidatui yra priskiriama **BlockSize** transakcijų. Pagal užduoties aprašą yra priskiriama po 100 transakcijų.
+- Iš viso yra sukūriami 5 kandidatai bloko kasimams.
+- Gražina kandidatų vektorių, kuris yra sudarytas iš priskirtų transakcijų vektoriaus.
 
-### Dependencies
+### Funkcija **Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas)**
+- Priskiriamas Max_Bandymų kiekis = 100000. Jeigu visiems kandidatams nepavyksta atrasti tinkamo hash'o Max_Bandymai kiekis padvigubeja
+- Yra padarytas paralelinis kasimas su OpenMp API.
+- Funkcija grąžina informaciją apie iškastą bloką.
 
-* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
-* ex. Windows 10
+### Funkcija **std::string create_merkle(std::vector<Transaction> transactions)**
+- Paimta Libbitcoin bibliotekos create_merkle implementacija.
 
-### Installing
-
-* How/where to download your program
-* Any modifications needed to be made to files/folders
-
-### Executing program
-
-* How to run the program
-* Step-by-step bullets
-```
-code blocks for commands
-```
-
-## Help
-
-Any advise for common problems or issues.
-```
-command to run if program contains helper info
-```
-
-## Authors
-
-Contributors names and contact info
-
-ex. Dominique Pizzie  
-ex. [@DomPizzie](https://twitter.com/dompizzie)
-
-## Version History
-
-* 0.2
-    * Various bug fixes and optimizations
-    * See [commit change]() or See [release history]()
-* 0.1
-    * Initial Release
-
-## License
-
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
-
-## Acknowledgments
-
-Inspiration, code snippets, etc.
-* [awesome-readme](https://github.com/matiassingers/awesome-readme)
-* [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
-* [dbader](https://github.com/dbader/readme-template)
-* [zenorocha](https://gist.github.com/zenorocha/4526327)
-* [fvcproductions](https://gist.github.com/fvcproductions/1bfc2d4aecb01a834b46)
+### Funkcija **void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Transaction> BlockTransactions, std::vector<User>& users)**
+- Jeigu transakcijoje nurodyti gavėjo ir siuntėjo PublicKey nėra randami tarp visų tinklo vartotojų transakcija yra atmetama.
+- Jeigu transakcijoje nurodytas siuntėjo balansas yra mažesnis nei transakcijos suma, tai transakcija yra atmetama.
+- Jeigu transakcijos duomenų maišos reikšmė nesutampa su tranksacijos **TransactionID**, tai transakcija yra atmetama.
+- Jeigu viskas okey, tai transakcija yra atliekama.
