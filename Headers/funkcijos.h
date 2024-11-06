@@ -12,7 +12,6 @@
 #include <fstream>
 #include <bitcoin/system.hpp>
 #include <list>
-#include <mpi.h>
 #include <omp.h>
 
 class User;
@@ -24,7 +23,6 @@ void PaddedInput(std::string& simboliu_seka);
 void Salt(std::string& simboliu_seka);
 std::string Maisos_funkcija(const std::string simboliu_seka);
 void GenerateUsers(int kiekis, std::vector<User>& users);
-Transaction GeneruotiTransakcija(User& Sender, User& Receiver, int TransakcijosIndex);
 std::vector<Transaction> GenerateTransactions(int kiekis, std::vector<User>& users);
 std::string RandomStringGeneravimas(int ilgis);
 int RandomSkaicius(int low, int high);

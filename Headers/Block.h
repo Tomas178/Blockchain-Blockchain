@@ -3,7 +3,6 @@
 
 #include "funkcijos.h"
 #include <ctime>
-#include "HashPointer.h"
 #include "Transaction.h"
 
 class Block {

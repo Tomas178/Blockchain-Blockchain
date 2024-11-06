@@ -89,7 +89,7 @@ std::vector<std::vector<Transaction>> GenerateCandidates(std::vector<Transaction
     return Kandidatu_sarasas;
 }
 
-Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas) {
+Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas){
     int Max_Bandymai = 100000;
     int Nonce = 0;
     std::string MasterString = "";
@@ -263,21 +263,21 @@ void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Tra
             continue;
         }
 
-        if(users[SenderIndex].GetBalansas() >= transaction.GetAmount()){
-            users[SenderIndex].SetBalansas(users[SenderIndex].GetBalansas() - transaction.GetAmount());
-            users[ReceiverIndex].SetBalansas(users[ReceiverIndex].GetBalansas() + transaction.GetAmount());
-        }
-        else{
-            std::cout << "NEPAKANKAMAS BALANSAS... TRANSAKCIJA NEATLIKTA, KURIOS ID: " << transaction.GetTransactionID() << std::endl;
-            continue;
-        }
-
         std::string txID = Maisos_funkcija(transaction.GetSender() + transaction.GetReceiver() + std::to_string(transaction.GetAmount()));
 
         if(txID != transaction.GetTransactionID()){
             std::cout << "TRANSAKCIJA NERA VALIDI... NESUTAMPA TRANSACTION ID HASH" << std::endl;
             std::cout << "Dabar sugeneruotas TRANSAKCIJOS ID: " << txID << std::endl;
             std::cout << "Is anksciau sugeneruotas TRANSAKCIJOS ID: " << transaction.GetTransactionID() << std::endl;
+            continue;
+        }
+
+        if(users[SenderIndex].GetBalansas() >= transaction.GetAmount()){
+            users[SenderIndex].SetBalansas(users[SenderIndex].GetBalansas() - transaction.GetAmount());
+            users[ReceiverIndex].SetBalansas(users[ReceiverIndex].GetBalansas() + transaction.GetAmount());
+        }
+        else{
+            std::cout << "NEPAKANKAMAS BALANSAS... TRANSAKCIJA NEATLIKTA, KURIOS ID: " << transaction.GetTransactionID() << std::endl;
             continue;
         }
     }
