@@ -14,6 +14,14 @@ int main(int argc, char** argv){
 
     std::cout << "Procesas: " << rank << " is " << size << " procesu" << std::endl;
 
+    if(rank == 0){
+        #ifdef _OPENMP
+            std::cout << "OpenMP is available. Version: " << _OPENMP << std::endl;
+        #else
+            std::cout << "OpenMP is not available." << std::endl;
+        #endif
+    }
+
     if (size < 2) {
         std::cerr << "This program requires at least 2 processes.\n";
         MPI_Finalize();
@@ -95,12 +103,12 @@ int main(int argc, char** argv){
     std::cout << "Ar norite kasti nauja bloka? (y/n)" << std::endl; std::cin >> atsakymas;
     }
 
-    if(rank == 1){
+    /*if(rank == 1){
         std::cout << "Isvedami vartotojai: " << std::endl;
         for(int i =0; i < users.size(); i++){
             std::cout << "Vartotojo vardas: " << users[i].GetName() << " PublicKey: " << users[i].GetPublicKey() << " Balansas: " << users[i].GetBalansas() << std::endl;
         }
-    }
+    }*/
 
     std::cout << "Procesas: " << rank << " Laukia kitu procesu..." << std::endl;
     MPI_Barrier(MPI_COMM_WORLD);
@@ -109,12 +117,12 @@ int main(int argc, char** argv){
     MPI_Bcast(&users, sizeof(users), MPI_BYTE, 0, MPI_COMM_WORLD);
     //MPI_Bcast(&Kandidatu_sarasas, sizeof(Kandidatu_sarasas), MPI_BYTE, 0, MPI_COMM_WORLD);
 
-    if(rank == 1){
+    /*if(rank == 1){
         std::cout << "Isvedami vartotojai: " << std::endl;
         for(int i =0; i < users.size(); i++){
             std::cout << "Vartotojo vardas: " << users[i].GetName() << " PublicKey: " << users[i].GetPublicKey() << " Balansas: " << users[i].GetBalansas() << std::endl;
         }
-    }
+    }*/
 
 
     while(atsakymas == 'y'){

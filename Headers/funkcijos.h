@@ -13,6 +13,7 @@
 #include <bitcoin/system.hpp>
 #include <list>
 #include <mpi.h>
+#include <omp.h>
 
 class User;
 class Transaction;
