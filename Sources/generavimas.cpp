@@ -18,6 +18,7 @@ void GenerateUsers(int kiekis, std::vector<User>& users){
             if(users[i].GetPublicKey() == users[j].GetPublicKey() && i != j){
                 std::cout << "RASTA SUTAMPANCIU PUBLICKEY... VARTOTOJAI NEBEGENERUOJAMI" << std::endl;
                 exit(1);
+                MPI_Finalize();
             }
         }
     }
@@ -89,14 +90,14 @@ std::vector<std::vector<Transaction>> GenerateCandidates(std::vector<Transaction
     return Kandidatu_sarasas;
 }
 
-Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas){
+Block MineBlock(int rank, int size, int BlockCount, int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas){
     int Max_Bandymai = 100000;
+    std::cout << "Entering MineBlock with rank: " << rank << " size: " << size << std::endl;
 
     std::shuffle(Kandidatu_sarasas.begin(), Kandidatu_sarasas.end(), std::mt19937{std::random_device{}()});
 
+    bool mined = false;
     while(true){
-        bool mined = false;
-
         for(int i = 0; i < Kandidatu_sarasas.size(); i++){
             int Nonce = 0;
             std::string MasterString = "";
@@ -105,7 +106,7 @@ Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPoi
             std::string Merkel_Root_Hash = create_merkle(Kandidatu_sarasas[i]);
             std::cout << "Merkel Root Hash: "<< Merkel_Root_Hash << std::endl;
 
-
+            std::cout << "Darba pradeda procesas: " << rank << std::endl;
             for(int j = 0; j < Max_Bandymai; j++){
                 double randomskaicius = RandomSkaicius(0, 999999);
                 Nonce = std::round(randomskaicius);
@@ -128,6 +129,12 @@ Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPoi
                     std::cout << "Nonce: " << Nonce << std::endl;
                     std::cout << "WinnerID: " << WinnerID << std::endl;
 
+                    /*MPI_Bcast(&mined, 1, MPI_C_BOOL, rank, MPI_COMM_WORLD);
+                    MPI_Bcast(&WinnerID, 1, MPI_INT, rank, MPI_COMM_WORLD);
+                    MPI_Bcast(&Nonce, 1, MPI_INT, rank, MPI_COMM_WORLD);
+                    MPI_Bcast(&TimeStamp, 1, MPI_INT, rank, MPI_COMM_WORLD);
+                    MPI_Bcast(&MasterHash, MasterHash.size(), MPI_CHAR, rank, MPI_COMM_WORLD);
+                    MPI_Bcast(&MasterString, MasterString.size(), MPI_CHAR, rank, MPI_COMM_WORLD);*/
 
                     // Output the time in seconds since the epoch
                     std::cout << "Current time in seconds since epoch: " << TimeStamp << std::endl;
@@ -139,8 +146,16 @@ Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPoi
                 }
             }
         }   
-        std::cout << "VISIEMS KANDIDATAMS NEPAVYKO... PADIDINAMAS BANDYMU SKAICIUS" << std::endl;
-        Max_Bandymai *= 2;
+        if(BlockCount > 0){
+            std::cout << "Procesas: " << rank << "laukia kito proceso..." << std::endl;
+            MPI_Barrier(MPI_COMM_WORLD);
+            std::cout << "VISIEMS KANDIDATAMS NEPAVYKO... PADIDINAMAS BANDYMU SKAICIUS" << std::endl;
+            Max_Bandymai *= 2;
+        }
+        else{
+            std::cout << "VISIEMS KANDIDATAMS NEPAVYKO... PADIDINAMAS BANDYMU SKAICIUS" << std::endl;
+            Max_Bandymai *= 2;
+        }
     }
 }
 

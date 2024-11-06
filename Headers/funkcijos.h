@@ -28,7 +28,7 @@ std::vector<Transaction> GenerateTransactions(int kiekis, std::vector<User>& use
 std::string RandomStringGeneravimas(int ilgis);
 int RandomSkaicius(int low, int high);
 std::vector<std::vector<Transaction>> GenerateCandidates(std::vector<Transaction>& transactions, int BlockSize);
-Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas);
+Block MineBlock(int rank, int size, int BlockCount, int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas);
 std::string create_merkle(std::vector<Transaction> transactions);
 void IsvestiBloka(int WinnerID, int BlockCount, Block* Block);
 void AtliktiTransakcijas(std::vector<Transaction>& transactions, std::vector<Transaction> BlockTransactions, std::vector<User>& users);

@@ -12,6 +12,8 @@ int main(int argc, char** argv){
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);  // Get the rank of this process
     MPI_Comm_size(MPI_COMM_WORLD, &size); // Get the total number of processes 
 
+    std::cout << "Procesas: " << rank << " is " << size << " procesu" << std::endl;
+
     if (size < 2) {
         std::cerr << "This program requires at least 2 processes.\n";
         MPI_Finalize();
@@ -24,10 +26,11 @@ int main(int argc, char** argv){
     int BlockSize = 100;
     std::string GenesisPreviousHash = "Tomas";
     Block* Blockchain_Head;
-    int Difficulty = 3;
+    int Difficulty = 4;
     int WinnerID = 0;
     std::string Version = "1.0";
     int BlockCount = 0;
+    char atsakymas = 'p';
     std::list<Block> Blockchain;
 
     std::vector<User> users(UsersCount);
@@ -57,7 +60,7 @@ int main(int argc, char** argv){
     std::cout << "Kandidatai sugeneruoti sekmingai." << std::endl << std::endl;
 
     std::cout << "Kasamas Genesis Blokas..." << std::endl;
-    Blockchain_Head = new Block(MineBlock(WinnerID, GenesisPreviousHash, nullptr, Version, Difficulty, Kandidatu_sarasas));
+    Blockchain_Head = new Block(MineBlock(rank, size, BlockCount, WinnerID, GenesisPreviousHash, nullptr, Version, Difficulty, Kandidatu_sarasas));
     Blockchain.push_back(*Blockchain_Head);
     std::cout << "Genesis blokas iskastas sekmingai:)" << std::endl << std::endl;
     for(Transaction transaction : Blockchain_Head->GetTransactions()){
@@ -89,15 +92,43 @@ int main(int argc, char** argv){
     BlockCount++;
 
     std::cout << "Likes transakciju kiekis: " << transactions.size() << std::endl;
+    std::cout << "Ar norite kasti nauja bloka? (y/n)" << std::endl; std::cin >> atsakymas;
     }
 
-    std::string atsakymas;
-    std::cout << "Ar norite kasti nauja bloka? (y/n)" << std::endl; std::cin >> atsakymas;
-    while(atsakymas == "y"){
+    if(rank == 1){
+        std::cout << "Isvedami vartotojai: " << std::endl;
+        for(int i =0; i < users.size(); i++){
+            std::cout << "Vartotojo vardas: " << users[i].GetName() << " PublicKey: " << users[i].GetPublicKey() << " Balansas: " << users[i].GetBalansas() << std::endl;
+        }
+    }
+
+    std::cout << "Procesas: " << rank << " Laukia kitu procesu..." << std::endl;
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Bcast(&BlockSize, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&atsakymas, 1, MPI_CHAR, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&users, sizeof(users), MPI_BYTE, 0, MPI_COMM_WORLD);
+    //MPI_Bcast(&Kandidatu_sarasas, sizeof(Kandidatu_sarasas), MPI_BYTE, 0, MPI_COMM_WORLD);
+
+    if(rank == 1){
+        std::cout << "Isvedami vartotojai: " << std::endl;
+        for(int i =0; i < users.size(); i++){
+            std::cout << "Vartotojo vardas: " << users[i].GetName() << " PublicKey: " << users[i].GetPublicKey() << " Balansas: " << users[i].GetBalansas() << std::endl;
+        }
+    }
+
+
+    while(atsakymas == 'y'){
+        if(rank == 0){
         std::cout << "Generuojami kandidatai..." << std::endl;
         Kandidatu_sarasas = GenerateCandidates(transactions, BlockSize);
         std::cout << "Kandidatai sugeneruoti sekmingai." << std::endl << std::endl;
-        Blockchain_Head = new Block(MineBlock(WinnerID, Blockchain_Head->GetMasterHash(), Blockchain_Head, Version, Difficulty, Kandidatu_sarasas));
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Bcast(&Kandidatu_sarasas, sizeof(Kandidatu_sarasas), MPI_BYTE, 0, MPI_COMM_WORLD);
+        std::cout << "Cia yra procesas: " << rank << " ir jis eina kasti bloko" << std::endl;
+        Blockchain_Head = new Block(MineBlock(rank, size, BlockCount, WinnerID, Blockchain_Head->GetMasterHash(), Blockchain_Head, Version, Difficulty, Kandidatu_sarasas));
+        std::cout << "Cia yra procesas: " << rank << " ir jis baige kasti bloka" << std::endl;
+        //if(rank == 0){
         Blockchain.push_back(*Blockchain_Head);
         for(Transaction transaction : Blockchain_Head->GetTransactions()){
             transactions.erase(std::remove_if(transactions.begin(), transactions.end(),
@@ -110,8 +141,13 @@ int main(int argc, char** argv){
         BlockCount++;
         std::cout << "Likes transakciju kiekis: " << transactions.size() << std::endl;
         std::cout << "Ar norite kasti nauja bloka? (y/n)" << std::endl; std::cin >> atsakymas;
+        //}
     }
 
+    std::cout << "Procesas " << rank << " baige darba ir laukia kito proceso kol baigs darba" << std::endl; 
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if(rank == 0){
     std::cout << "Isvedami vartotoju balansai po transakciju..." << std::endl;
     std::ofstream RF3("Vartotojai_Po_Visu_Transakciju.txt");
     RF3 << std::left << std::setw(20) << "Vartotojo vardas:" << std::setw(70) << "PublicKey:" << std::setw(15) << "Balansas:" << std::endl;
@@ -121,16 +157,12 @@ int main(int argc, char** argv){
     }
     RF3.close();
     std::cout << "Vartotoju balansus po transakciju galima rasti Vartotojai_Po_Visu_Transakciju.txt" << std::endl << std::endl;
+    }
 
+    std::cout << "Procesas " << rank << " baigia darba..." << std::endl;
     //printBlockInChain(Blockchain, 2);
     //printBlockChain(Blockchain);
 
-    //std::cout << "Ar norite isbandyti paralelini bloku kasima? (y/n)" << std::endl; std::cin >> paralelinis_kasimas;
-    //}
-    MPI_Barrier(MPI_COMM_WORLD);
-    //if(paralelinis_kasimas == "y"){
-        std::cout << "Procesas: " << rank << " vykdo bloku kasima..." << std::endl;
-    //}
 
     MPI_Finalize();
     return 0;
