@@ -2,7 +2,6 @@
 #include "../Headers/Transaction.h"
 #include "../Headers/User.h"
 #include "../Headers/Block.h"
-#include "../Headers/Data.h"
 
 int main(){
 
