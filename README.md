@@ -1,9 +1,9 @@
 # Decentralizuotas Blockchain'as
 
 ### Struktūra
-- User klasė – skirta saugoti duomenys apie vartotoją: vardą, unikalų PublicKey ir turima balansą.
-- Transaction klasė - skirta saugoti duomenys apie transakciją: unikalų TransactionID, Siuntejo **PublicKey**, gavėjo PublicKey ir siunčiamą sumą.
-- Block klasė - skirta saugoti duomenys apie bloką: prieš tai buvusio bloko hash'ą **PreviousHash**, Rodyklę į prieš tai buvusį bloką **PreviousBlockPointer**, pačio bloko hash'ą **MasterHash**, laiko žymą kada buvo iškastas blokas **TimeStamp**, Versiją **Version**, Merkle hash'ą **MerkleHash**, **Nonce**, **Difficulty** ir visas bloko transakcijas **Transactions**.
+- **User** klasė – skirta saugoti duomenys apie vartotoją: vardą, unikalų PublicKey ir turima balansą.
+- **Transaction** klasė - skirta saugoti duomenys apie transakciją: unikalų TransactionID, Siuntejo **PublicKey**, gavėjo PublicKey ir siunčiamą sumą.
+- **Block** klasė - skirta saugoti duomenys apie bloką: prieš tai buvusio bloko hash'ą **PreviousHash**, Rodyklę į prieš tai buvusį bloką **PreviousBlockPointer**, pačio bloko hash'ą **MasterHash**, laiko žymą kada buvo iškastas blokas **TimeStamp**, Versiją **Version**, Merkle hash'ą **MerkleHash**, **Nonce**, **Difficulty** ir visas bloko transakcijas **Transactions**.
 - **Hash.cpp** – naudojamas hash'as iš 1 laboratorinio darbo
 - **Generavimas.cpp** – visos papildomos funkcijos, kurios naudojamos programoje, tokios kaip vartojojų generavimas, transakcijų generavimas, blokų kasimas ir t.t.
 - Programoje yra naudojamas gerosios OOP praktikos (enkapsuliavimas, konstruktoriai ir RAII idiomas).
@@ -22,7 +22,7 @@
 
 ### Funkcija **Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas)**
 - Priskiriamas Max_Bandymų kiekis = 100000. Jeigu visiems kandidatams nepavyksta atrasti tinkamo hash'o Max_Bandymai kiekis padvigubeja
-- Yra padarytas paralelinis kasimas su OpenMp API.
+- Yra padarytas paralelinis kasimas su OpenMP API.
 - Funkcija grąžina informaciją apie iškastą bloką.
 
 ### Funkcija **std::string create_merkle(std::vector<Transaction> transactions)**
