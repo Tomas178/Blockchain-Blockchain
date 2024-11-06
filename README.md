@@ -21,8 +21,8 @@
 - Gražina kandidatų vektorių, kuris yra sudarytas iš priskirtų transakcijų vektoriaus.
 
 ### Funkcija **Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas)**
-- Priskiriamas Max_Bandymų kiekis = 100000. Jeigu visiems kandidatams nepavyksta atrasti tinkamo hash'o Max_Bandymai kiekis padvigubeja
-- Yra padarytas paralelinis kasimas su OpenMP API.
+- Priskiriamas **Max_Bandymai** kiekis = 100000. Jeigu visiems kandidatams nepavyksta atrasti tinkamo hash'o **Max_Bandymai** kiekis padvigubėja
+- Yra padarytas paralelinis blokų kasimas su OpenMP API.
 - Funkcija grąžina informaciją apie iškastą bloką.
 
 ### Funkcija **std::string create_merkle(std::vector<Transaction> transactions)**
