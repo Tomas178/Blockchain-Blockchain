@@ -89,59 +89,106 @@ std::vector<std::vector<Transaction>> GenerateCandidates(std::vector<Transaction
     return Kandidatu_sarasas;
 }
 
-Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas){
+Block MineBlock(int& WinnerID, std::string PreviousHash, Block* PreviousBlockPointer, std::string Version, int Difficulty, std::vector<std::vector<Transaction>> Kandidatu_sarasas) {
     int Max_Bandymai = 100000;
+    int Nonce = 0;
+    std::string MasterString = "";
+    std::string MasterHash = "";
 
     std::shuffle(Kandidatu_sarasas.begin(), Kandidatu_sarasas.end(), std::mt19937{std::random_device{}()});
 
-    while(true){
-        bool mined = false;
+    bool mined = false;
+    Block block_result("", nullptr, "", 0, "", 0, 0, "", {});
 
-        for(int i = 0; i < Kandidatu_sarasas.size(); i++){
-            int Nonce = 0;
-            std::string MasterString = "";
-            std::string MasterHash = "";
+    // Define a thread-local variable to signal when a solution is found
+    #pragma omp parallel private(MasterString, MasterHash, Nonce) shared(mined, WinnerID, Max_Bandymai, block_result)
+    {
+        bool thread_mined = false;  // Thread-local variable
 
-            std::string Merkel_Root_Hash = create_merkle(Kandidatu_sarasas[i]);
-            std::cout << "Merkel Root Hash: "<< Merkel_Root_Hash << std::endl;
-
-
-            for(int j = 0; j < Max_Bandymai; j++){
-                double randomskaicius = RandomSkaicius(0, 999999);
-                Nonce = std::round(randomskaicius);
-                MasterString = std::to_string(Nonce) + PreviousHash + Version + Merkel_Root_Hash + std::to_string(Difficulty);
-                MasterHash = Maisos_funkcija(MasterString);
-                //std::cout << "MasterString = "<< MasterString << std::endl;
-                //std::cout << "MasterHash = "<< MasterHash << std::endl;
-
-                for(int z = 0; z < Difficulty; z++){
-                    if(MasterHash[z] != '0') break;
-                    if(z == Difficulty - 1) mined = true;
+        while(!mined){
+            #pragma omp critical
+            {
+                std::cout << "Thread (" << omp_get_thread_num() << ") Max_Bandymai: " << Max_Bandymai << std::endl;
+            }
+            #pragma omp for schedule(static, 1)
+            for (int i = 0; i < Kandidatu_sarasas.size(); i++) {
+                if (mined || thread_mined) {
+                    // Skip this thread if already mined
+                    continue;
                 }
 
-                if(mined){
-                    WinnerID = i+1;
-                    std::time_t TimeStamp = std::time(nullptr);
+                std::string Merkel_Root_Hash = create_merkle(Kandidatu_sarasas[i]);
+                #pragma omp critical
+                {
+                std::cout <<"Thread (" << omp_get_thread_num() << ") Merkel Root Hash: " << Merkel_Root_Hash << std::endl;
+                }
 
-                    std::cout << "MasterString: " << MasterString << std::endl;
-                    std::cout << "MasterHash: " << MasterHash << std::endl;
-                    std::cout << "Nonce: " << Nonce << std::endl;
-                    std::cout << "WinnerID: " << WinnerID << std::endl;
+                for (int j = 0; j < Max_Bandymai; j++) {
+                    if (mined || thread_mined) {
+                        // Skip if mined
+                        break;
+                    }
 
+                    double randomskaicius = RandomSkaicius(0, 999999);
+                    Nonce = std::round(randomskaicius);
+                    MasterString = std::to_string(Nonce) + PreviousHash + Version + Merkel_Root_Hash + std::to_string(Difficulty);
+                    MasterHash = Maisos_funkcija(MasterString);
 
-                    // Output the time in seconds since the epoch
-                    std::cout << "Current time in seconds since epoch: " << TimeStamp << std::endl;
+                    // Check if hash meets difficulty
+                    for (int z = 0; z < Difficulty; z++) {
+                        if (MasterHash[z] != '0') break;
+                        if (z == Difficulty - 1) {
+                            // Mark this thread as having found a solution
+                            thread_mined = true;
+                            #pragma omp critical
+                            {
+                                if (!mined) {  // Only set mined once
+                                    mined = true;
+                                    WinnerID = i + 1;
+                                    std::time_t TimeStamp = std::time(nullptr);
 
-                    // Optionally, convert to a human-readable format
-                    std::cout << "Human-readable time: " << std::ctime(&TimeStamp); // std::ctime converts time_t to a string
+                                    std::cout << "MasterString: " << MasterString << std::endl;
+                                    std::cout << "MasterHash: " << MasterHash << std::endl;
+                                    std::cout << "Nonce: " << Nonce << std::endl;
+                                    std::cout << "WinnerID: " << WinnerID << std::endl;
 
-                    return Block(PreviousHash, PreviousBlockPointer, MasterHash, TimeStamp, Version, Difficulty, Nonce, Merkel_Root_Hash, Kandidatu_sarasas[i]);
+                                    // Output the time in seconds since the epoch
+                                    std::cout << "Current time in seconds since epoch: " << TimeStamp << std::endl;
+
+                                    // Optionally, convert to a human-readable format
+                                    std::cout << "Human-readable time: " << std::ctime(&TimeStamp) << std::endl;
+
+                                    // Set the block result here
+                                    block_result = Block(PreviousHash, PreviousBlockPointer, MasterHash, TimeStamp, Version, Difficulty, Nonce, Merkel_Root_Hash, Kandidatu_sarasas[i]);
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        }   
-        std::cout << "VISIEMS KANDIDATAMS NEPAVYKO... PADIDINAMAS BANDYMU SKAICIUS" << std::endl;
-        Max_Bandymai *= 2;
+
+            #pragma omp critical
+            {
+                std::cout << "Thread: " << omp_get_thread_num() << " laukia..." << std::endl;
+            }
+            #pragma omp barrier
+            #pragma omp critical
+            {
+            std::cout << "Thread: " << omp_get_thread_num() << " vel pradeda darba..." << std::endl;
+            }
+            #pragma omp master
+            {
+                if (!mined){
+                    std::cout << "Master thread: " << omp_get_thread_num() << " dvigubina max_bandymu skaiciu." << std::endl;
+                    std::cout << "VISIEMS KANDIDATAMS NEPAVYKO... PADIDINAMAS BANDYMU SKAICIUS" << std::endl;
+                    Max_Bandymai *= 2;
+                }
+            }
+            #pragma omp barrier  // Ensure all threads see the updated Max_Bandymai
+        }
     }
+    // After parallel section, return the mined block (which has been set in the critical section)
+    return block_result;
 }
 
 std::string create_merkle(std::vector<Transaction> transactions)
